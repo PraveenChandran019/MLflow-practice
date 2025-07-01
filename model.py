@@ -1,9 +1,16 @@
 import mlflow
 import pandas as pd
 import numpy as np
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 data = pd.read_csv(r"C:\Users\Naveena\Downloads\water_potability.csv")
 
+
+mlflow.set_tracking_uri("http://127.0.0.1:5000")
+
+mlflow.set_experiment("GB")
 from sklearn.model_selection import train_test_split
 train_data,test_data = train_test_split(data,test_size=0.20,random_state=42)
 def fill_missing_with_median(df):
@@ -17,7 +24,7 @@ def fill_missing_with_median(df):
 # Fill missing values with median
 train_processed_data = fill_missing_with_median(train_data)
 test_processed_data = fill_missing_with_median(test_data)
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 import pickle
 X_train = train_processed_data.iloc[:,0:-1].values
 y_train = train_processed_data.iloc[:,-1].values
@@ -25,7 +32,7 @@ y_train = train_processed_data.iloc[:,-1].values
 n_estimators = 700
 
 with mlflow.start_run():
-    clf = RandomForestClassifier(n_estimators=n_estimators)
+    clf = GradientBoostingClassifier(n_estimators=n_estimators)
     clf.fit(X_train,y_train)
 
 # save 
@@ -49,6 +56,13 @@ with mlflow.start_run():
     mlflow.log_metric("f1-score",f1_score)
 
     mlflow.log_param("n_estimators",n_estimators)
+    
+    cm = confusion_matrix(y_test,y_pred)
+    plt.figure(figsize=(5,5))
+    sns.heatmap(cm,annot = True)
+    
+    plt.savefig("confusion_matrix.png")
+    mlflow.log_artifact("confusion_matrix.png")
     
 
     print("acc",acc)
