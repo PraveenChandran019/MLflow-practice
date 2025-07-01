@@ -29,7 +29,7 @@ import pickle
 X_train = train_processed_data.iloc[:,0:-1].values
 y_train = train_processed_data.iloc[:,-1].values
 
-n_estimators = 700
+n_estimators = 900
 
 with mlflow.start_run():
     clf = GradientBoostingClassifier(n_estimators=n_estimators)
@@ -48,12 +48,12 @@ with mlflow.start_run():
     acc = accuracy_score(y_test,y_pred)
     precision = precision_score(y_test,y_pred)
     recall = recall_score(y_test,y_pred)
-    f1_score = f1_score(y_test,y_pred)
+    f1 = f1_score(y_test,y_pred)
     
     mlflow.log_metric("acc",acc)
     mlflow.log_metric("precision", precision)
     mlflow.log_metric("recall", recall)
-    mlflow.log_metric("f1-score",f1_score)
+    mlflow.log_metric("f1-score",f1)
 
     mlflow.log_param("n_estimators",n_estimators)
     
@@ -63,6 +63,11 @@ with mlflow.start_run():
     
     plt.savefig("confusion_matrix.png")
     mlflow.log_artifact("confusion_matrix.png")
+    
+    mlflow.log_artifact(__file__)
+    
+    mlflow.set_tag("author","Praveen")
+    mlflow.set_tag("model","GB")
     
 
     print("acc",acc)
